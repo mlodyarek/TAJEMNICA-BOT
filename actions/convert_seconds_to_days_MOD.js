@@ -34,7 +34,7 @@ module.exports = {
     //---------------------------------------------------------------------
 
     // Who made the mod (If not set, defaults to "DBM Mods")
-    author: "Aamon", //Idea by Tresmos    // I don't know who Tremos is but 'heya' =]]]
+    author: "Aamon", //Idea by Tresmos   // I don't know who Tremos is but 'heya' =]]]
 
     // The version of the mod (Defaults to 1.0.0)
     version: "1.9.6", //added in 1.9.4

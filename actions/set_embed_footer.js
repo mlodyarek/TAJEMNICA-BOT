@@ -5,7 +5,7 @@ module.exports = {
 	// This is the name of the action displayed in the editor.
 	//---------------------------------------------------------------------
 
-	name: "Check Member Permissions",
+	name: "Set Embed Footer",
 
 	//---------------------------------------------------------------------
 	// Action Section
@@ -13,7 +13,7 @@ module.exports = {
 	// This is the section the action will fall into.
 	//---------------------------------------------------------------------
 
-	section: "Conditions",
+	section: "Embed Message",
 
 	//---------------------------------------------------------------------
 	// Action Subtitle
@@ -22,8 +22,7 @@ module.exports = {
 	//---------------------------------------------------------------------
 
 	subtitle: function(data) {
-		const results = ["Continue Actions", "Stop Action Sequence", "Jump To Action", "Jump Forward Actions"];
-		return `If True: ${results[parseInt(data.iftrue)]} ~ If False: ${results[parseInt(data.iffalse)]}`;
+		return `${data.message}`;
 	},
 
 	//---------------------------------------------------------------------
@@ -34,7 +33,7 @@ module.exports = {
 	// are also the names of the fields stored in the action's JSON data.
 	//---------------------------------------------------------------------
 
-	fields: ["member", "varName", "permission", "iftrue", "iftrueVal", "iffalse", "iffalseVal"],
+	fields: ["storage", "varName", "message", "footerIcon"],
 
 	//---------------------------------------------------------------------
 	// Command HTML
@@ -56,24 +55,23 @@ module.exports = {
 		return `
 <div>
 	<div style="float: left; width: 35%;">
-		Source Member:<br>
-		<select id="member" class="round" onchange="glob.memberChange(this, 'varNameContainer')">
-			${data.members[isEvent ? 1 : 0]}
+		Source Embed Object:<br>
+		<select id="storage" class="round" onchange="glob.refreshVariableList(this)">
+			${data.variables[1]}
 		</select>
 	</div>
-	<div id="varNameContainer" style="display: none; float: right; width: 60%;">
+	<div id="varNameContainer" style="float: right; width: 60%;">
 		Variable Name:<br>
 		<input id="varName" class="round" type="text" list="variableList"><br>
 	</div>
 </div><br><br><br>
-<div style="padding-top: 8px; width: 80%;">
-	Permission:<br>
-	<select id="permission" class="round">
-		${data.permissions[2]}
-	</select>
+<div style="padding-top: 8px;">
+	Footer:<br>
+	<textarea id="message" rows="3" placeholder="Insert footer here..." style="width: 99%; font-family: monospace; white-space: nowrap; resize: none;"></textarea>
 </div><br>
-<div>
-	${data.conditions[0]}
+<div style="float: left; width: 99%;">
+	Footer Icon URL:<br>
+	<input id="footerIcon" class="round" type="text" placeholder="Leave blank for none!"><br>
 </div>`;
 	},
 
@@ -88,9 +86,7 @@ module.exports = {
 	init: function() {
 		const { glob, document } = this;
 
-		glob.memberChange(document.getElementById("member"), "varNameContainer");
-		glob.onChangeTrue(document.getElementById("iftrue"));
-		glob.onChangeFalse(document.getElementById("iffalse"));
+		glob.refreshVariableList(document.getElementById("storage"));
 	},
 
 	//---------------------------------------------------------------------
@@ -103,14 +99,13 @@ module.exports = {
 
 	action: function(cache) {
 		const data = cache.actions[cache.index];
-		const type = parseInt(data.member);
+		const storage = parseInt(data.storage);
 		const varName = this.evalMessage(data.varName, cache);
-		const member = this.getMember(type, varName, cache);
-		let result = false;
-		if(member) {
-			result = member.permissions.has([data.permission]);
+		const embed = this.getVariable(storage, varName, cache);
+		if(embed && embed.setFooter) {
+			embed.setFooter(this.evalMessage(data.message, cache), this.evalMessage(data.footerIcon, cache));
 		}
-		this.executeResults(result, data, cache);
+		this.callNextAction(cache);
 	},
 
 	//---------------------------------------------------------------------

@@ -104,7 +104,7 @@ module.exports = {
 		<div>
 			<p>
 				<u>Mod Info:</u><br>
-				Created by EGGSY! & Fixed by Quinten
+				Created by EGGSY!
 			</p>
 		</div><br>
 	<div style="width: 95%; padding-top: 8px;">
@@ -178,22 +178,19 @@ module.exports = {
 
 		// Main code:
 		const WrexMODS = this.getWrexMods(); // as always.
-		WrexMODS.CheckAndInstallNodeModule('google');
-		const google = WrexMODS.require('google');
+		WrexMODS.CheckAndInstallNodeModule('google-it');
+		const googleIt = WrexMODS.require('google-it');
 
-		google.resultsPerPage = 20;
-		google(`${string}`, (err, res) => {
-			let result;
-			if(err) console.log('Error in google search mod! ' + err);
+		googleIt({ 'query': `${string}`, 'no-display': 1, 'limit': 10 }).then(results => {
 			switch (info) {
-				case 0: 
-					result = res.links[resultNumber].title;
+				case 0:
+					result = results[resultNumber].title;
 					break;
 				case 1:
-					result = res.links[resultNumber].link;
+					result = results[resultNumber].link;
 					break;
 				case 2:
-					result = res.links[resultNumber].description;
+					result = results[resultNumber].snippet;
 					break;
 				default:
 					break;
@@ -206,7 +203,10 @@ module.exports = {
 			} else {
 				this.callNextAction(cache);
 			}
-		});
+		}).catch(e => {
+			console.log("An error in Google Search MOD: " + e);
+			this.callNextAction(cache);
+		})
 	},
 
 	//---------------------------------------------------------------------
